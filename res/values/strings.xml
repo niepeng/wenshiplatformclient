@@ -1,0 +1,86 @@
+<resources>
+
+    <string name="app_name">yun</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+    
+    <string name="pull_to_refresh_pull_label">下拉可以刷新</string>
+    <string name="pull_to_refresh_release_label">松开可以刷新</string>
+    <string name="pull_to_refresh_refreshing_label">加载中...</string>
+    <string name="pull_to_refresh_tap_label">...</string>
+    
+    
+    
+    <string name="app_btn_label_ok">确定</string>
+	<string name="app_btn_label_canel">取消</string>
+	<string name="app_back_label"> 返回</string>
+	<string name="app_label_add">添加</string>
+	<string name="app_btn_label_update">修改</string>
+	<string name="app_btn_label_del">删除</string>
+	<string name="app_label_notify">提醒</string>
+	<string name="app_label_opt">操作</string>
+	<string name="app_msg_leave">当前数据没有保存，确定要离开？</string>
+	<string name="app_label_conect_network_fail">连接网络失败。</string>
+	<string name="app_unit_km">公里以内</string>
+	<string name="app_unit_metre">米以内</string>
+	<string name="app_unit_yuan">元</string>
+	<string name="app_label_exit">再按一次退出应用程序</string>
+	<string name="app_label_back">后退</string>
+	<string name="app_read_data">"数据读取中，请稍候..."</string>
+	<string name="app_up_data">数据处理中，请稍候...</string>
+    <string name="update_client_sd_no_space_msg">对不起，无法下载到你的SD卡，请确保SD卡有用的空间。</string>
+    <string name="app_pull_to_refresh_tap_label">刷新</string>
+	<string name="app_pull_to_refresh_pull_label">下拉可以刷新</string>
+	<string name="app_pull_to_refresh_release_label">松开可以刷新</string>
+	<string name="app_pull_to_refresh_refreshing_label">加载中...</string>
+	
+	<string name="login_username_empty">用户名不能为空</string>
+	<string name="login_username_length_limit">用户名长度不能操作20个字符</string>
+	<string name="login_psw_empty">密码不能为空</string>
+	<string name="login_psw_length_limit">密码长度不能操作20个字符</string>
+	
+	<string name="intime_area_title">选择区域</string>
+	<string name="intime_area_title_all">全部区域</string>
+	
+	<string name="setup_title">设置</string>
+	<string name="setup_about_us">关于我们</string>
+	<string name="setup_update_time_setup">更新周期设置</string>
+	<string name="setup_new_products">更多新产品介绍</string>
+	<string name="setup_share">分享</string>
+	<string name="setup_feedback">给我留言</string>
+	<string name="setup_version_update">版本更新</string>
+	
+	
+	 <string name="more_feedback_title">意见反馈</string>
+     <string name="more_feedback_word_tv_label">您还可以输入%s个字</string>
+     <string name="more_feed_back_submit_btn_label">提交</string>
+     <string name="more_feed_back_content_empty">反馈内容不能为空</string>
+	 <string name="more_feed_back_content_range">反馈内容不能超过%s个字</string>
+	 
+	 
+	 <string-array name="intime_labels">
+        <item>1分钟</item>
+        <item>2分钟</item>
+        <item>3分钟</item>
+        <item>5分钟</item>
+        <item>10分钟</item>
+        <item>半小时</item>
+        <item>1小时</item>
+        <item>2小时</item>
+    </string-array>
+    
+	 <string-array name="alarm_labels">
+        <item>1分钟</item>
+        <item>5分钟</item>
+        <item>10分钟</item>
+        <item>15分钟</item>
+        <item>20分钟</item>
+        <item>25分钟</item>
+        <item>30分钟</item>
+        <item>60分钟</item>
+    </string-array>
+    
+    
+
+</resources>
