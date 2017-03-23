@@ -1,7 +1,12 @@
 package com.baibutao.app.waibao.yun.android.util;
 
+import java.util.Map;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.gson.Gson;
 
 /**
  * @author lsb
@@ -9,6 +14,64 @@ import org.json.JSONObject;
  * @date 2012-5-30 ÉÏÎç10:31:25
  */
 public class JsonUtil {
+	
+	public static JSONObject getJsonObject(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+
+		if(obj instanceof JSONObject) {
+			return (JSONObject)obj;
+		}
+
+		String content = (String) obj;
+		if (StringUtil.isBlank(content)) {
+			return null;
+		}
+		try {
+			JSONObject json = new JSONObject(content);
+			return json;
+		} catch (JSONException e) {
+			return null;
+		}
+	}
+
+	public static JSONArray getJsonArray(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+
+		if(obj instanceof JSONArray) {
+			return (JSONArray)obj;
+		}
+
+		String content = (String) obj;
+
+		if (StringUtil.isBlank(content)) {
+			return null;
+		}
+		try {
+			JSONArray json = new JSONArray(content);
+			return json;
+		} catch (JSONException e) {
+			return null;
+		}
+	}
+	
+	public static JSONArray getJsonArray(JSONObject json, String name) {
+		if (json == null || name == null) {
+			return null;
+		}
+		if (!json.has(name)) {
+			return null;
+		}
+		try {
+			return json.getJSONArray(name);
+		} catch (JSONException e) {
+			return null;
+		}
+	}
+
 	public static JSONObject getJSONObject(JSONObject json, String name) {
 		if (json == null || name == null) {
 			return null;
@@ -77,5 +140,20 @@ public class JsonUtil {
 		} catch (JSONException e) {
 			return defaultValue;
 		}
+	}
+	
+	public static <T> String mapToJson(Map<String, T> map) {
+		Gson gson = new Gson();
+		String jsonStr = gson.toJson(map);
+		return jsonStr;
+	}
+	
+	public static <T> T jsonToBean(String jsonString, Class<T> beanCalss) {
+		try {
+			Gson gson = new Gson();
+			return gson.fromJson(jsonString, beanCalss);
+		} catch (Exception e) {
+		}
+		return null;
 	}
 }

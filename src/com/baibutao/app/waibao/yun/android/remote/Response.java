@@ -3,6 +3,7 @@ package com.baibutao.app.waibao.yun.android.remote;
 import java.util.Date;
 
 import com.baibutao.app.waibao.yun.android.common.MessageCodes;
+import com.baibutao.app.waibao.yun.android.util.JsonUtil;
 
 /**
  * @author lsb
@@ -13,7 +14,7 @@ public class Response {
 	public Response() {
 		super();
 	}
-
+	
 	public Response(int code, String message) {
 		super();
 		this.code = code;
@@ -36,6 +37,14 @@ public class Response {
 	
 	public boolean isSuccess() {
 		return (code == MessageCodes.SUCCESS);
+	}
+	
+	public boolean isDataSuccess() {
+		if (!(model instanceof String)) {
+			return false;
+		}
+		code = JsonUtil.getInt(JsonUtil.getJsonObject(model), "code", -1);
+		return isSuccess();
 	}
 
 	public void setCode(int code) {

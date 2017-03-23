@@ -37,9 +37,12 @@ public class NavigationActivity extends BaseActivity {
 	private TabWidget tabWidget;
 
 	private static final int NAVEIGATION[][] = {
-		{ R.drawable.foot_near_1, R.drawable.foot_near_2 }, 
-		{ R.drawable.foot_shopping_1, R.drawable.foot_shopping_2},
-		{ R.drawable.foot_more_1, R.drawable.foot_more_2 } 
+//		{ R.drawable.foot_near_1, R.drawable.foot_near_2 }, 
+//		{ R.drawable.foot_shopping_1, R.drawable.foot_shopping_2},
+//		{ R.drawable.foot_more_1, R.drawable.foot_more_2 } 
+		{ R.drawable.udata, R.drawable.data }, 
+		{ R.drawable.ualarm, R.drawable.alarm},
+		{ R.drawable.umore, R.drawable.more } 
 	};
 
 	protected static final Class<?>[] TAB_ITEMS = { InTimeActivity.class, AlarmActivity.class, SetupActivity.class };
@@ -199,7 +202,7 @@ public class NavigationActivity extends BaseActivity {
 	private void addNewsList(TabHost tabs) {
 		Intent intent = new Intent(NavigationActivity.this, InTimeActivity.class);
 		TabSpec tabSpec = tabs.newTabSpec(NavigationTabIndexEnum.IN_TIME.getStringValue());
-		tabSpec.setIndicator("实时数据", null);
+		tabSpec.setIndicator("实时", null);
 		tabSpec.setContent(intent);
 		tabs.addTab(tabSpec);
 	}
@@ -207,7 +210,7 @@ public class NavigationActivity extends BaseActivity {
 	private void addShoppingList(TabHost tabs) {
 		Intent intent = new Intent(NavigationActivity.this, AlarmActivity.class);
 		TabSpec tabSpec = tabs.newTabSpec(NavigationTabIndexEnum.ALARM.getStringValue());
-		tabSpec.setIndicator("查看报警", null);
+		tabSpec.setIndicator("报警", null);
 		tabSpec.setContent(intent);
 		tabs.addTab(tabSpec);
 	}
@@ -215,7 +218,7 @@ public class NavigationActivity extends BaseActivity {
 	private void addMore(TabHost tabs) {
 		Intent intent = new Intent(NavigationActivity.this, SetupActivity.class);
 		TabSpec tabSpec = tabs.newTabSpec(NavigationTabIndexEnum.SET_UP.getStringValue());
-		tabSpec.setIndicator("更多设置", null);
+		tabSpec.setIndicator("更多", null);
 		tabSpec.setContent(intent);
 		tabs.addTab(tabSpec);
 	}

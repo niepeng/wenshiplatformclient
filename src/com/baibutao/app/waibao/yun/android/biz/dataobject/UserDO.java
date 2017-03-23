@@ -7,6 +7,8 @@ public class UserDO {
 	private String username;
 	
 	private String psw;
+	
+	private String mail;
 
 	public long getId() {
 		return id;
@@ -30,6 +32,14 @@ public class UserDO {
 
 	public void setPsw(String psw) {
 		this.psw = psw;
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
 	}
 	
 }

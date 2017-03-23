@@ -1,14 +1,14 @@
 package com.baibutao.app.waibao.yun.android.activites;
 
+import java.util.Map;
 import java.util.concurrent.Future;
-
-import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -21,6 +21,10 @@ import com.baibutao.app.waibao.yun.android.config.Config;
 import com.baibutao.app.waibao.yun.android.remote.RemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.Request;
 import com.baibutao.app.waibao.yun.android.remote.Response;
+import com.baibutao.app.waibao.yun.android.remote.parser.StringResponseParser;
+import com.baibutao.app.waibao.yun.android.remotesimple.Httpclient;
+import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
+import com.baibutao.app.waibao.yun.android.util.JsonUtil;
 import com.baibutao.app.waibao.yun.android.util.MD5;
 import com.baibutao.app.waibao.yun.android.util.StringUtil;
 
@@ -78,13 +82,32 @@ public class LoginActivity extends BaseActivity {
 			return;
 		}
 
-		RemoteManager remoteManager = RemoteManager.getPostOnceRemoteManager();
-		Request request = remoteManager.createPostRequest(Config.getConfig().getProperty(Config.Names.USER_LOGIN_URL));
-		request.addParameter("userName", username);
-		request.addParameter("psw", MD5.getMD5(psw.getBytes()));
+		
+		RemoteManager remoteManager = RemoteManager.getRawRemoteManager();
+//		Request request = remoteManager.createPostRequest(Config.getConfig().getProperty(Config.Names.USER_LOGIN_URL));
+//		request.addParameter("userName", username);
+//		request.addParameter("psw", MD5.getMD5(psw.getBytes()));
+		remoteManager.setResponseParser(new StringResponseParser());
+		Request request = remoteManager.createPostRequest(Config.Values.URL);
+//		request.setBody("{\"user\":\"cqy\",\"password\":\""+MD5.encrypt("123456")+"\"}");
+		final Map<String, Object> map = CollectionUtil.newHashMap();
+		map.put("user", username);
+		map.put("password", MD5.encrypt(psw));
+		request.setBody(JsonUtil.mapToJson(map));
+		request.addHeader("type", "login");
+		
+		
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				String resultValue = Httpclient.subPostForBody(Config.Values.URL, JsonUtil.mapToJson(map), null, "type", "login");
+//				Log.e("ffffffffffff", resultValue);
+//			}
+//		}).start();
+		
 		ProgressDialog progressDialog = showProgressDialog(R.string.app_read_data);
 		progressDialog.setOnDismissListener(new Login());
-		responseFuture = eewebApplication.asyInvoke(new ThreadHelper(progressDialog, request));
+		responseFuture = eewebApplication.asyInvoke(new ThreadHelper(progressDialog, request, remoteManager));
 	}
 
 	private class Login implements OnDismissListener {
@@ -97,19 +120,17 @@ public class LoginActivity extends BaseActivity {
 
 			try {
 				Response response = responseFuture.get();
-				if (!response.isSuccess()) {
-					LoginActivity.this.toastLong(response.getMessage());
+				if (!response.isDataSuccess()) {
+					LoginActivity.this.toastLong(R.string.login_username_psw_wrong);
 					return;
 				}
-				JSONObject jsonObject = (JSONObject) response.getModel();
-				JSONObject json = jsonObject.getJSONObject("data");
-				long userId = json.getLong("id");
+//				JSONObject jsonObject = JsonUtil.getJsonObject(response.getModel());
 				UserDO userDO = new UserDO();
 				userDO.setUsername(usernameText.getText().toString());
 				userDO.setPsw(pswText.getText().toString());
-				userDO.setId(userId);
 				toastLong("登录成功,加载数据中...");
 				eewebApplication.setUserDO(userDO);
+				
 //				UserInfoHolder.saveUser(LoginActivity.this, userDO);
 				
 				Intent intent = new Intent(LoginActivity.this, NavigationActivity.class);

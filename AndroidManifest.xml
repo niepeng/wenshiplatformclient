@@ -14,7 +14,7 @@
 		<uses-permission android:name="android.permission.READ_LOGS"></uses-permission>
 		<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
 		<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission> 
-	 	<uses-permission android:name="android.permission.INSTALL_PACKAGES"></uses-permission>
+	 	<!-- <uses-permission android:name="android.permission.INSTALL_PACKAGES"></uses-permission> -->
 	 	<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"></uses-permission>
 	 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	 	<uses-permission android:name="android.permission.VIBRATE" />
@@ -49,11 +49,31 @@
         <activity android:name=".activites.SetupActivity" android:launchMode="singleTask" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
         
         
+        
+       <activity android:name=".activites.device.DeviceReadAddActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceAddBySeriActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+
+       <activity android:name=".activites.device.DeviceDetailActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceHistoryActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceHistoryDataActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceHistoryAlarmActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceHistoryAlarmDataActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceSetupActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceSetupUpdateNameActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceSetupUpdateAreaActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceSetupUpdateDistanceTimeActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+       <activity android:name=".activites.device.DeviceSetupUpdateExtendActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+        
+                
+        
         <activity android:name=".activites.LoginActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".activites.UpdateClientActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".activites.MoreAboutActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".activites.SetupUpdateDataTimeActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
         <activity android:name=".activites.SetupNewProductActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+        <activity android:name=".activites.UserManageActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+        <activity android:name=".activites.UserManageUpdatePswActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
+        <activity android:name=".activites.UserManageBindMailActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
       
        <!--  <activity android:name=".activites.ItemDetailActivity" android:screenOrientation="portrait" android:theme="@android:style/Theme.NoTitleBar" android:windowSoftInputMode="adjustPan"></activity>
          -->

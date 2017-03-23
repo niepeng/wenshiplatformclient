@@ -20,17 +20,26 @@ public class ThreadHelper implements Callable<Response> {
 
 	private Request request;
 	
+	private RemoteManager remoteManager;
+	
 	
 	public ThreadHelper(ProgressDialog progressDialog, Request request) {
 		super();
 		this.progressDialog = progressDialog;
 		this.request = request;
 	}
+	
+	public ThreadHelper(ProgressDialog progressDialog, Request request, RemoteManager remoteManager) {
+		this(progressDialog, request);
+		this.remoteManager = remoteManager;
+	}
 
 	@Override
 	public Response call() throws Exception {
 		try {
-			RemoteManager remoteManager = RemoteManager.getFullFeatureRemoteManager();
+			if(remoteManager == null) {
+				remoteManager = RemoteManager.getFullFeatureRemoteManager();
+			}
 			Response response = remoteManager.execute(request);
 			Log.d("response", String.valueOf(response));
 			if(progressDialog != null) {

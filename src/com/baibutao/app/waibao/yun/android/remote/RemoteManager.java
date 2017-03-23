@@ -2,6 +2,8 @@ package com.baibutao.app.waibao.yun.android.remote;
 
 import com.baibutao.app.waibao.yun.android.androidext.EewebApplication;
 import com.baibutao.app.waibao.yun.android.remote.http.HttpRemoteManager;
+import com.baibutao.app.waibao.yun.android.remote.parser.JsonResponseParser;
+import com.baibutao.app.waibao.yun.android.remote.parser.ResponseParser;
 import com.baibutao.app.waibao.yun.android.remote.proxy.AutoConnectRemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.proxy.CheckNetworkStateRemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.proxy.SecurityRemoteManager;
@@ -21,10 +23,16 @@ public abstract Request createQueryRequest(String target);
 	
 	protected static EewebApplication cardApplication;
 	
-	private static RemoteManager defaultRemoteManager = new HttpRemoteManager();
+//	private static RemoteManager defaultRemoteManager = new HttpRemoteManager();
+	
+	protected ResponseParser responseParser = new JsonResponseParser();
 	
 	public static void init(EewebApplication cardApplication) {
 		RemoteManager.cardApplication = cardApplication;
+	}
+	
+	public void setResponseParser(ResponseParser paramResponseParser) {
+		this.responseParser = paramResponseParser;
 	}
 	
 	/**
@@ -32,7 +40,7 @@ public abstract Request createQueryRequest(String target);
 	 * @return
 	 */
 	public static RemoteManager getRawRemoteManager() {
-		return defaultRemoteManager;
+		return new HttpRemoteManager();
 	}
 	
 	/**
@@ -42,12 +50,12 @@ public abstract Request createQueryRequest(String target);
 	 * @return
 	 */
 	public static RemoteManager getSecurityRemoteManager() {
-		return new CheckNetworkStateRemoteManager(new SecurityRemoteManager(defaultRemoteManager));
+		return new CheckNetworkStateRemoteManager(new SecurityRemoteManager(new HttpRemoteManager()));
 	}
 	
 	
 	public static RemoteManager getAutoLoginSecurityRemoteManager() {
-		return new CheckNetworkStateRemoteManager(new SecurityRemoteManager(defaultRemoteManager));
+		return new CheckNetworkStateRemoteManager(new SecurityRemoteManager(new HttpRemoteManager()));
 	}
 	
 	/**
@@ -58,7 +66,7 @@ public abstract Request createQueryRequest(String target);
 	 * @return
 	 */
 	public static RemoteManager getPostOnceRemoteManager() {
-		return new CheckNetworkStateRemoteManager(new SecurityRemoteManager(defaultRemoteManager));
+		return new CheckNetworkStateRemoteManager(new SecurityRemoteManager(new HttpRemoteManager()));
 	}
 	
 	/**
@@ -71,7 +79,7 @@ public abstract Request createQueryRequest(String target);
 	 * @return
 	 */
 	public static RemoteManager getFullFeatureRemoteManager() {
-		return new CheckNetworkStateRemoteManager(new AutoConnectRemoteManager(new SecurityRemoteManager(defaultRemoteManager), 1));
+		return new CheckNetworkStateRemoteManager(new AutoConnectRemoteManager(new SecurityRemoteManager(new HttpRemoteManager()), 1));
 	}
 	
 }

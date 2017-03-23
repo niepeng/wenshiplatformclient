@@ -4,14 +4,25 @@
     android:orientation="vertical" >
 
     <!-- 标题栏 -->
-    <RelativeLayout style="@style/app_title_main" >
+    <LinearLayout style="@style/app_title_main"
+        android:orientation="vertical"
+		android:layout_height="100dip">
+        
+        <ImageView  style="@style/app_title_wrap"
+            android:layout_width="fill_parent"
+			android:layout_height="70dip"
+			android:layout_marginTop="5dip"
+            android:src="@drawable/head_icon"  />
 
         <TextView
+            android:id="@+id/setup_username"
             style="@style/app_title_wrap"
-            android:layout_centerInParent="true"
-            android:text="@string/setup_title" />
+            android:textSize="15dip"
+             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="5dip"/>
 
-    </RelativeLayout>
+    </LinearLayout>
+    
     
      <LinearLayout
             style="@style/app_corner_wrap"
@@ -22,7 +33,7 @@
             <Button
                 style="@style/app_row_with_arrow"
                 android:onClick="handleUpdateSetup"
-                android:text="@string/setup_update_time_setup" />
+                android:text="@string/setup_user_manage" />
 
             <include layout="@drawable/line_split" />
             
@@ -47,7 +58,7 @@
                 android:onClick="handleCheckUpdate"
                 android:text="@string/setup_version_update" />
 
-            <include layout="@drawable/line_split" />
+           <!--   <include layout="@drawable/line_split" /> -->
 
 
         </LinearLayout>

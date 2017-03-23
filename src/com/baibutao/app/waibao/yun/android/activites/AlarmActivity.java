@@ -2,7 +2,9 @@ package com.baibutao.app.waibao.yun.android.activites;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -16,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -26,22 +29,23 @@ import com.baibutao.app.waibao.yun.android.activites.common.AbstractBaseAdapter;
 import com.baibutao.app.waibao.yun.android.activites.common.BaseActivity;
 import com.baibutao.app.waibao.yun.android.activites.common.ThreadAid;
 import com.baibutao.app.waibao.yun.android.activites.common.ThreadListener;
-import com.baibutao.app.waibao.yun.android.biz.JSONHelper;
-import com.baibutao.app.waibao.yun.android.biz.dataobject.AlarmMsgDO;
-import com.baibutao.app.waibao.yun.android.common.Tuple;
+import com.baibutao.app.waibao.yun.android.biz.bean.AlarmBean;
+import com.baibutao.app.waibao.yun.android.biz.bean.DeviceBean;
 import com.baibutao.app.waibao.yun.android.config.Config;
 import com.baibutao.app.waibao.yun.android.remote.RemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.Request;
 import com.baibutao.app.waibao.yun.android.remote.Response;
+import com.baibutao.app.waibao.yun.android.remote.parser.StringResponseParser;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
 import com.baibutao.app.waibao.yun.android.util.DateUtil;
+import com.baibutao.app.waibao.yun.android.util.JsonUtil;
 import com.baibutao.app.waibao.yun.android.util.MD5;
 
 public class AlarmActivity extends BaseActivity implements ThreadListener {
 
 	private ListView listView;
 
-	private List<AlarmMsgDO> alarmList;
+	private List<DeviceBean> alarmList;
 
 	private AlarmAdapter alarmAdapter;
 
@@ -109,12 +113,24 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 		if (isLastPage) {
 			return;
 		}
-		RemoteManager remoteManager = RemoteManager.getFullFeatureRemoteManager();
-		Request request = remoteManager.createQueryRequest(Config.getConfig().getProperty(Config.Names.ALARM_LIST_URL));
-		request.addParameter("page", page++);
-		request.addParameter("userId", eewebApplication.getUserDO().getId());
-		request.addParameter("psw", MD5.getMD5(eewebApplication.getUserDO().getPsw().getBytes()));
-		eewebApplication.asyInvoke(new ThreadAid(this, request));
+//		RemoteManager remoteManager = RemoteManager.getFullFeatureRemoteManager();
+//		Request request = remoteManager.createQueryRequest(Config.getConfig().getProperty(Config.Names.ALARM_LIST_URL));
+//		request.addParameter("page", page++);
+//		request.addParameter("userId", eewebApplication.getUserDO().getId());
+//		request.addParameter("psw", MD5.getMD5(eewebApplication.getUserDO().getPsw().getBytes()));
+//		eewebApplication.asyInvoke(new ThreadAid(this, request));
+
+		RemoteManager remoteManager = RemoteManager.getRawRemoteManager();
+		remoteManager.setResponseParser(new StringResponseParser());
+		Request request = remoteManager.createPostRequest(Config.Values.URL);
+		final Map<String, Object> map = CollectionUtil.newHashMap();
+		map.put("user", eewebApplication.getUserDO().getUsername());
+		request.setBody(JsonUtil.mapToJson(map));
+		request.addHeader("type", "getAccountErr");
+
+//		responseFuture = eewebApplication.asyInvoke(new ThreadHelper(progressDialog, request, remoteManager));
+		eewebApplication.asyInvoke(new ThreadAid(this, request, remoteManager));
+		
 		setUpdateTime(null);
 	}
 	
@@ -127,7 +143,8 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 	}
 
 	private void setViewContent() {
-		listView.setOnItemClickListener(new ItemClickListener());
+		listView.setOnItemClickListener(null);
+//		listView.setOnItemClickListener(new ItemClickListener());
 	}
 
 	public void handleLoadMore(View v) {
@@ -153,30 +170,65 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 		if (response == null) {
 			return;
 		}
-		if (response.isSuccess()) {
-			Tuple.Tuple2<List<AlarmMsgDO>, Date> result = JSONHelper.json2AlarmList((JSONObject) response.getModel());
-			final List<AlarmMsgDO> currentList = result._1();
-			Date date = result._2();
-			if (date != null) {
-				eewebApplication.setLastRequestAlarmTime(date);
-			}
-			int currentSize = currentList.size();
-			if (currentSize == 0) {
-				isLastPage = true;
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						toastLong("没有更多的数据");
+		setViewGone(loadMoreBtn, loadMoreProgressBar);
+		
+		JSONArray array = JsonUtil.getJsonArray(response.getModel());
+		final List<DeviceBean> currentList = CollectionUtil.newArrayList();
+		
+		if (array != null) {
+			try {
+				List<DeviceBean> tmpList = CollectionUtil.newArrayList();
+				JSONObject json = null;
+				DeviceBean bean = null;
+				JSONArray alarmArray = null;
+				AlarmBean alarmBean = null;
+				List<AlarmBean> alarmBeanList = null;
+				for (int i = 0, size = array.length(); i < size; i++) {
+					json = array.getJSONObject(i);
+					if (json == null) {
+						continue;
 					}
-				});
-				setViewGone(loadMoreBtn, loadMoreProgressBar);
-				return;
-			} else {
-				setViewVisible(listView, loadMoreBtn);
-				setViewGone(loadMoreProgressBar);
-			}
+					bean = new DeviceBean();
+					bean.setSnaddr(JsonUtil.getString(json, "snaddr", null));
+					bean.setDevName(JsonUtil.getString(json, "devName", null));
+					bean.setArea(JsonUtil.getString(json, "area", null));
+					alarmArray = json.getJSONArray("detail");
+					alarmBeanList = CollectionUtil.newArrayList();
+					for (int j = 0, alarmLenth = alarmArray.length(); j < alarmLenth; j++) {
+						alarmBean = JsonUtil.jsonToBean(alarmArray.getJSONObject(j).toString(), AlarmBean.class);
+						alarmBeanList.add(alarmBean);
+					}
+					bean.setAlarmBeanList(alarmBeanList);
+					tmpList.add(bean);
+				}
+				
+				formatCurrent(currentList, tmpList);
+				
+				
+//			Tuple.Tuple2<List<AlarmBean>, Date> result = JSONHelper.json2AlarmList((JSONObject) response.getModel());
+//			final List<AlarmBean> currentList = result._1();
+//			Date date = result._2();
+//			if (date != null) {
+//				eewebApplication.setLastRequestAlarmTime(date);
+//			}
+//			int currentSize = currentList.size();
+//			if (currentSize == 0) {
+//				isLastPage = true;
+//				runOnUiThread(new Runnable() {
+//					@Override
+//					public void run() {
+//						toastLong("没有更多的数据");
+//					}
+//				});
+//				setViewGone(loadMoreBtn, loadMoreProgressBar);
+//				return;
+//			} else {
+//				setViewVisible(listView, loadMoreBtn);
+//				setViewGone(loadMoreProgressBar);
+//			}
+//
 
-			runOnUiThread(new Runnable() {
+				runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					alarmList.addAll(currentList);
@@ -187,6 +239,9 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 					}
 				}
 			});
+				
+			} catch (Exception e) {
+			}
 
 		} else {
 			setViewVisible(loadMoreBtn);
@@ -202,48 +257,103 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 
 	}
 
+	private void formatCurrent(List<DeviceBean> currentList, List<DeviceBean> tmpList) {
+		for (DeviceBean deviceBean : tmpList) {
+			currentList.add(deviceBean);
+			if (!CollectionUtil.isEmpty(deviceBean.getAlarmBeanList())) {
+				for (AlarmBean alarmBean : deviceBean.getAlarmBeanList()) {
+					DeviceBean bean = new DeviceBean();
+					bean.setAlarmBean(alarmBean);
+					currentList.add(bean);
+				}
+			}
+		}
+	}
+
 	private class AlarmAdapter extends AbstractBaseAdapter {
 
-		public AlarmAdapter(List<AlarmMsgDO> catList) {
+		public AlarmAdapter(List<DeviceBean> catList) {
 			super(catList);
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder holder;
+			LinearLayout holder = null;
+			
+			DeviceBean deviceBean = (DeviceBean) getItem(position);
+			if(deviceBean == null) {
+				return holder;
+			}
+			
 			if (convertView == null) {
-				holder = new ViewHolder(AlarmActivity.this);
+				if (deviceBean.isShowAlarmMsg()) {
+					holder = new ViewHolderCell(AlarmActivity.this);
+				} else {
+					holder = new ViewHolderMain(AlarmActivity.this);
+				}
 			} else {
-				holder = (ViewHolder) convertView;
+				holder = (LinearLayout) convertView;
 			}
 
-			AlarmMsgDO alarmMsgDO = (AlarmMsgDO) getItem(position);
-			if (alarmMsgDO != null) {
-				holder.nameTv.setText(alarmMsgDO.getAreaName() + " - " + alarmMsgDO.getShowName());
-				holder.timeTv.setText("报警时间：" + DateUtil.format(alarmMsgDO.getAlarmTime(), DateUtil.DATE_MMddHHmm));
-				holder.reasonTv.setText(alarmMsgDO.getReason());
+			
+			
+			if(deviceBean.isShowAlarmMsg()) {
+				ViewHolderCell cell = (ViewHolderCell)holder;
+//				cell.imageView.setImageDrawable(getDrawableByType(deviceBean.getAlarmBean().getType()));
+				cell.imageView.setImageDrawable(getDrawableByType(deviceBean.getAlarmBean()));
+				cell.mainTv.setText(deviceBean.getAlarmBean().getMsg());
+				cell.timeTv.setText(deviceBean.getAlarmBean().getAlarmTime());
+				return cell;
+			} else {
+				ViewHolderMain main = (ViewHolderMain)holder;
+				main.mainTv.setText("设备名:" + deviceBean.getDevName());
+				main.snaddrTv.setText(deviceBean.getSnaddr());
+				return main;
 			}
-
-			return holder;
 		}
 
 	}
 
-	private class ViewHolder extends LinearLayout {
+	private class ViewHolderCell extends LinearLayout {
 
-		public TextView nameTv;
+//		public TextView nameTv;
+//		public TextView timeTv;
+//		public TextView reasonTv;
+		
+		public ImageView imageView;
+		public TextView mainTv;
 		public TextView timeTv;
-		public TextView reasonTv;
+		
 
-		public ViewHolder(Context context) {
+		public ViewHolderCell(Context context) {
 			super(context);
 			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			LinearLayout itemWrap = (LinearLayout) layoutInflater.inflate(R.layout.alarm_list_view_item, this);
-			nameTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_item_name_tv);
-			timeTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_time_tv);
-			reasonTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_reason_tv);
+//			LinearLayout itemWrap = (LinearLayout) layoutInflater.inflate(R.layout.alarm_list_view_item, this);
+//			nameTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_item_name_tv);
+//			timeTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_time_tv);
+//			reasonTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_reason_tv);
+			
+			LinearLayout itemWrap = (LinearLayout) layoutInflater.inflate(R.layout.alarm_list_view_item_cell, this);
+			imageView = (ImageView) itemWrap.findViewById(R.id.alarm_list_view_item_cell_img);
+			mainTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_item_cell_name_tv);
+			timeTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_item_cell_time_tv);
 		}
 	}
+	
+	private class ViewHolderMain extends LinearLayout {
+
+		public TextView mainTv;
+		public TextView snaddrTv;
+
+		public ViewHolderMain(Context context) {
+			super(context);
+			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LinearLayout itemWrap = (LinearLayout) layoutInflater.inflate(R.layout.alarm_list_view_item_main, this);
+			mainTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_item_main_name_tv);
+			snaddrTv = (TextView) itemWrap.findViewById(R.id.alarm_list_view_item_main_snaddr_tv);
+		}
+	}
+	
 
 	class ItemClickListener implements OnItemClickListener {
 		public void onItemClick(AdapterView<?> arg0,// The AdapterView where the
@@ -252,13 +362,13 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 				int arg2,// The position of the view in the adapter
 				long arg3// The row id of the item that was clicked
 		) {
-			 final AlarmMsgDO alarmMsgDO = (AlarmMsgDO)arg0.getItemAtPosition(arg2);
+			 final AlarmBean alarmMsgDO = (AlarmBean)arg0.getItemAtPosition(arg2);
 			 // 删除待确认操作
 			 confirm("确定要删除该报警信息？", new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						// 执行删除操作 1.页面上删除，2. 提交到服务器端
-						remove(alarmList, alarmMsgDO);
+//						remove(alarmList, alarmMsgDO);
 					}
 
 				}, null);
@@ -266,20 +376,20 @@ public class AlarmActivity extends BaseActivity implements ThreadListener {
 
 	}
 	
-	private void remove(List<AlarmMsgDO> alarmList, AlarmMsgDO alarmMsgDO) {
+	private void remove(List<AlarmBean> alarmList, AlarmBean alarmMsgDO) {
 		if(CollectionUtil.isEmpty(alarmList)) {
 			return;
 		}
-		for(AlarmMsgDO tmp : alarmList) {
-			if(tmp.getId() == alarmMsgDO.getId()) {
-				alarmList.remove(alarmMsgDO);
-				alarmAdapter.notifyDataSetChanged();
-				toastShort("删除成功");
-				// 提交到服务器端
-				deleteAlarm(alarmMsgDO.getId());
-				return;
-			}
-		}
+//		for(AlarmMsgDO tmp : alarmList) {
+//			if(tmp.getId() == alarmMsgDO.getId()) {
+//				alarmList.remove(alarmMsgDO);
+//				alarmAdapter.notifyDataSetChanged();
+//				toastShort("删除成功");
+//				// 提交到服务器端
+//				deleteAlarm(alarmMsgDO.getId());
+//				return;
+//			}
+//		}
 		
 	}
 

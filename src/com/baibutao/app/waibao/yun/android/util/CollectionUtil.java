@@ -42,6 +42,10 @@ public class CollectionUtil {
 	public static <E> ArrayList<E> newArrayList(Collection<? extends E> c) {
 		return new ArrayList<E>(c);
 	}
+	
+	public static <E> ArrayList<E> newArrayList(int size) {
+		return new ArrayList<E>(size);
+	}
 
 	public static <E> boolean isEmpty(Collection<E> c) {
 		if (c == null || c.isEmpty()) {

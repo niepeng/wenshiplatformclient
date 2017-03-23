@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.baibutao.app.waibao.yun.android.R;
 import com.baibutao.app.waibao.yun.android.activites.common.BaseActivity;
@@ -29,9 +30,8 @@ public class SetupActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.setup);
 		
-//		Vibrator vib = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
-//		long[] pattern = {200, 1000, 200, 1000, 200, 1000};
-//		vib.vibrate(pattern , -1);
+		TextView usernameTv = (TextView) findViewById(R.id.setup_username);
+		usernameTv.setText(eewebApplication.getUserDO().getUsername());
 	}
 	
 	
@@ -41,8 +41,9 @@ public class SetupActivity extends BaseActivity {
 	}
 	
 	public void handleUpdateSetup(View v) {
-		Intent intent = new Intent(this, SetupUpdateDataTimeActivity.class);
+		Intent intent = new Intent(this, UserManageActivity.class);
 		startActivity(intent);
+		
 	}
 	
 	public void handleNewProducts(View v) {

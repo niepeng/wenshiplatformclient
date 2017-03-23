@@ -1,6 +1,7 @@
 package com.baibutao.app.waibao.yun.android.remote;
 
 import java.util.List;
+import java.util.Map;
 
 import com.baibutao.app.waibao.yun.android.common.ProgressCallback;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
@@ -14,6 +15,8 @@ public class Request implements Cloneable {
 	
 	private String target;
 	
+	private String body;
+	
 	private String sessionId;
 	
 	private ProgressCallback uploadFileCallback;
@@ -24,6 +27,8 @@ public class Request implements Cloneable {
 	}
 
 	private List<Parameter> parameters = CollectionUtil.newArrayList();
+	
+	private Map<String, String> headerMap = CollectionUtil.newHashMap(); 
 	
 	private List<BinaryItem> binaryItems = CollectionUtil.newArrayList();
 
@@ -64,6 +69,11 @@ public class Request implements Cloneable {
 		return this;
 	}
 	
+	public Request addHeader(String name, String value) {
+		headerMap.put(name, value);
+		return this;
+	}
+	
 	public List<BinaryItem> getBinaryItems() {
 		return binaryItems;
 	}
@@ -88,6 +98,19 @@ public class Request implements Cloneable {
 	public void setUploadFileCallback(ProgressCallback uploadFileCallback) {
 		this.uploadFileCallback = uploadFileCallback;
 	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public void setBody(String body) {
+		this.body = body;
+	}
+
+	public Map<String, String> getHeaderMap() {
+		return headerMap;
+	}
+	
 }
 
 

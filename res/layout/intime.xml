@@ -17,12 +17,20 @@
             android:layout_centerInParent="true"
             android:text="实时数据" />
 
+        <!-- 
         <Button
             style="@style/app_title_right"
             android:layout_width="30dip"
             android:layout_height="30dip"
             android:background="@drawable/icon_refresh"
             android:onClick="handleReflush" />
+         -->
+         <Button
+            style="@style/app_title_right"
+            android:layout_width="30dip"
+            android:layout_height="30dip"
+            android:background="@drawable/set"
+            android:onClick="handleAdd" />
     </RelativeLayout>
 
     <include layout="@layout/title_line_bottom" />

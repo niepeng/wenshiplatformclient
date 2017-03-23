@@ -23,7 +23,6 @@ import com.baibutao.app.waibao.yun.android.remote.RemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.Request;
 import com.baibutao.app.waibao.yun.android.remote.Response;
 import com.baibutao.app.waibao.yun.android.remote.http.HttpRemoteRequest.Method;
-import com.baibutao.app.waibao.yun.android.remote.parser.JsonResponseParser;
 import com.baibutao.app.waibao.yun.android.remote.parser.ResponseParser;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
 import com.baibutao.app.waibao.yun.android.util.IoUtil;
@@ -38,8 +37,6 @@ import com.baibutao.app.waibao.yun.android.util.StringUtil;
 public class HttpRemoteManager extends RemoteManager {
 
 	private static final String JSESSION_STR = "jsessionid=";
-
-	private ResponseParser responseParser = new JsonResponseParser();
 
 	private int timeout = HttpClientUtil.TIMEOUT;
 	
@@ -100,7 +97,10 @@ public class HttpRemoteManager extends RemoteManager {
 		}
 		if (method == HttpRemoteRequest.Method.POST) {
 			if (CollectionUtil.isEmpty(request.getBinaryItems())) {
-				return HttpClientUtil.createPostMethod(request.getTarget(), request.getParameters());
+				if(StringUtil.isBlank(request.getBody())) {
+					return HttpClientUtil.createPostMethod(request.getTarget(), request.getParameters());
+				} 
+				return HttpClientUtil.createPostMethodForBody(request.getTarget(), request.getBody(), request.getHeaderMap());
 			}
 			return HttpClientUtil.createMultipartPostMethod(request.getTarget(), request.getParameters(), request.getBinaryItems(), request.getUploadFileCallback());
 		}

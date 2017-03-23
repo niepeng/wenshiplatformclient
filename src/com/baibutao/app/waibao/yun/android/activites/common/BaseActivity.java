@@ -1,29 +1,44 @@
 package com.baibutao.app.waibao.yun.android.activites.common;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
+import liuyongxiang.robert.com.testtime.wheelview.ScreenInfo;
+import liuyongxiang.robert.com.testtime.wheelview.WheelMain;
 import android.app.ActivityGroup;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibutao.app.waibao.yun.android.R;
+import com.baibutao.app.waibao.yun.android.activites.AlarmActivity;
 import com.baibutao.app.waibao.yun.android.androidext.EewebApplication;
 import com.baibutao.app.waibao.yun.android.biz.LoadImgDO;
+import com.baibutao.app.waibao.yun.android.biz.bean.AlarmBean;
 import com.baibutao.app.waibao.yun.android.util.AssetsUtil;
 import com.baibutao.app.waibao.yun.android.util.DateUtil;
 import com.baibutao.app.waibao.yun.android.util.StringUtil;
@@ -42,6 +57,11 @@ public class BaseActivity extends ActivityGroup {
 	protected static Drawable defaultImageSmall;
 
 	protected final Handler handler = new Handler();
+	
+	protected WheelMain wheelMainDate;
+	
+	protected static final int ACTIVITY_RESULT_CODE = 1;
+	protected static final int ACTIVITY_DEL_RESULT_CODE = 2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,22 +91,112 @@ public class BaseActivity extends ActivityGroup {
 //		StatService.onPause(this);
 	}
 	
+	protected Drawable getDrawableByType(AlarmBean alarmBean) {
+		Resources resources = this.getResources();
+		String type = alarmBean.getType();
+		// 	// 1:温度过高;2:温度过低;3:湿度过高;4:湿度过低;5:开关报警;6:设备离线;7:传感器异常;8:传感器未连接
+		if("1".equals(type) || "2".equals(type)) {
+			if("0".equals(alarmBean.getBeginEndMark())) {
+				return resources.getDrawable(R.drawable.temp);
+			}
+			return resources.getDrawable(R.drawable.temp2);
+		}
+		
+		if("3".equals(type) || "4".equals(type)) {
+			if("0".equals(alarmBean.getBeginEndMark())) {
+				return resources.getDrawable(R.drawable.humi);
+			}
+			return resources.getDrawable(R.drawable.humi2);
+		}
+
+		if("6".equals(type)) {
+			if("0".equals(alarmBean.getBeginEndMark())) {
+				return resources.getDrawable(R.drawable.off);
+			}
+			return resources.getDrawable(R.drawable.off2);
+		}
+		
+		if("7".equals(type)) {
+			if("0".equals(alarmBean.getBeginEndMark())) {
+				return resources.getDrawable(R.drawable.nosensor);
+			}
+			return resources.getDrawable(R.drawable.nosensor2);
+		}
+		
+		return null;
+	}
+	
 	protected ProgressDialog showProgressDialog(int message) {
 		String title = getString(R.string.app_name);
 		String messageString = getString(message);
 		return ProgressDialog.show(this, title, messageString);
 	}
+	
+	public void showBottoPopupWindow(final TextView currentTv, TextView locationTv) {
+		WindowManager manager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+		Display defaultDisplay = manager.getDefaultDisplay();
+		DisplayMetrics outMetrics = new DisplayMetrics();
+		defaultDisplay.getMetrics(outMetrics);
+		int width = outMetrics.widthPixels;
+		View menuView = LayoutInflater.from(this).inflate(R.layout.show_popup_window, null);
+		final PopupWindow mPopupWindow = new PopupWindow(menuView, (int) (width * 0.8), LinearLayout.LayoutParams.WRAP_CONTENT);
+		ScreenInfo screenInfoDate = new ScreenInfo(this);
+		wheelMainDate = new WheelMain(menuView, true);
+		wheelMainDate.screenheight = screenInfoDate.getHeight();
+
+		String dateStr = currentTv.getText().toString();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(DateUtil.parse(dateStr, DateUtil.DEFAULT_DATE_FMT));
+		int year = calendar.get(Calendar.YEAR);
+		int month = calendar.get(Calendar.MONTH);
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+		int hours = calendar.get(Calendar.HOUR_OF_DAY);
+		int minute = calendar.get(Calendar.MINUTE);
+		wheelMainDate.initDateTimePicker(year, month, day, hours, minute);
+		// mPopupWindow.setAnimationStyle(R.style.AnimationPreview);
+		
+		mPopupWindow.setTouchable(true);
+		mPopupWindow.setFocusable(true);
+		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
+		mPopupWindow.showAtLocation(locationTv, Gravity.CENTER, 0, 0);
+		mPopupWindow.setOnDismissListener(new poponDismissListener());
+		// backgroundAlpha(0.6f);
+		TextView tv_cancle = (TextView) menuView.findViewById(R.id.tv_cancle);
+		TextView tv_ensure = (TextView) menuView.findViewById(R.id.tv_ensure);
+		TextView tv_pop_title = (TextView) menuView.findViewById(R.id.tv_pop_title);
+		tv_pop_title.setText("选择时间");
+		tv_cancle.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				mPopupWindow.dismiss();
+				// backgroundAlpha(1f);
+			}
+		});
+
+		tv_ensure.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Date selectDate = wheelMainDate.getTimeDate();
+				currentTv.setText(DateUtil.format(selectDate, DateUtil.DEFAULT_DATE_FMT));
+				mPopupWindow.dismiss();
+				// backgroundAlpha(1f);
+			}
+		});
+	}
+	
+	class poponDismissListener implements PopupWindow.OnDismissListener {
+        @Override
+        public void onDismiss() {
+//            backgroundAlpha(1f);
+        }
+
+    }
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			if (isTabActivity()) {
-				confirm("确认退出eeweb监控平台？", new OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						eewebApplication.finishAllActivities(); 
-					}
-				}, null);
+				exit();
 				return true;
 			} else {
 				this.finish();
@@ -95,6 +205,15 @@ public class BaseActivity extends ActivityGroup {
 		return super.onKeyDown(keyCode, event);
 	}
 	
+	protected void exit() {
+		confirm(this.getResources().getString(R.string.app_exit_confirm), new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				eewebApplication.finishAllActivities(); 
+			}
+		}, null);
+	}
+
 	private boolean isTabActivity() {
 		for (TabFlushEnum tabFlushEnum : eewebApplication.tabFlushEnums) {
 			if (this.getClass().getName().equals(tabFlushEnum.getTabActivity().getName())) {

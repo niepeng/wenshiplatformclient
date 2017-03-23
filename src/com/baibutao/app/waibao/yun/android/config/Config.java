@@ -15,6 +15,11 @@ import android.util.Log;
  * @date 2012-5-29 обнГ11:10:13
  */
 public class Config {
+	
+	public interface Values {
+		
+		String URL = "http://api.eefield.com";
+	}
 
 	public interface Names {
 		

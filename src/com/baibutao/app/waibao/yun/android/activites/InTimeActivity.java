@@ -1,15 +1,21 @@
 package com.baibutao.app.waibao.yun.android.activites;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,19 +38,26 @@ import com.baibutao.app.waibao.yun.android.activites.common.BaseActivity;
 import com.baibutao.app.waibao.yun.android.activites.common.ThreadAid;
 import com.baibutao.app.waibao.yun.android.activites.common.ThreadHelper;
 import com.baibutao.app.waibao.yun.android.activites.common.ThreadListener;
+import com.baibutao.app.waibao.yun.android.activites.device.DeviceDetailActivity;
+import com.baibutao.app.waibao.yun.android.activites.device.DeviceReadAddActivity;
 import com.baibutao.app.waibao.yun.android.biz.JSONHelper;
+import com.baibutao.app.waibao.yun.android.biz.bean.DeviceBean;
+import com.baibutao.app.waibao.yun.android.biz.bean.DeviceDataBean;
 import com.baibutao.app.waibao.yun.android.biz.dataobject.AreaDO;
-import com.baibutao.app.waibao.yun.android.biz.dataobject.EquipmentDO;
 import com.baibutao.app.waibao.yun.android.config.Config;
 import com.baibutao.app.waibao.yun.android.remote.RemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.Request;
 import com.baibutao.app.waibao.yun.android.remote.Response;
+import com.baibutao.app.waibao.yun.android.remote.parser.StringResponseParser;
+import com.baibutao.app.waibao.yun.android.remotesimple.Httpclient;
+import com.baibutao.app.waibao.yun.android.util.ChangeUtil;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
 import com.baibutao.app.waibao.yun.android.util.DateUtil;
+import com.baibutao.app.waibao.yun.android.util.JsonUtil;
 import com.baibutao.app.waibao.yun.android.util.MD5;
-import com.baibutao.app.waibao.yun.android.util.NumberFormatUtil;
+import com.baibutao.app.waibao.yun.android.util.StringUtil;
 
-public class InTimeActivity extends BaseActivity {
+public class InTimeActivity extends BaseActivity  {
 	
 	private TextView gmtmodifiedTv;
 
@@ -62,7 +75,7 @@ public class InTimeActivity extends BaseActivity {
 	
 	private GridView intimeGridView;
 
-	private List<EquipmentDO> equiList;
+	private List<DeviceBean> equiList;
 	
 	private EquipmentAdapter equipmentAdapter;
 	
@@ -138,17 +151,28 @@ public class InTimeActivity extends BaseActivity {
 //		if (isLastPage) {
 //			return;
 //		}
-		RemoteManager remoteManager = RemoteManager.getFullFeatureRemoteManager();
-		Request request = remoteManager.createQueryRequest(Config.getConfig().getProperty(Config.Names.ITEM_LIST_URL));
-		request.addParameter("page", page);
-		request.addParameter("userId", eewebApplication.getUserDO().getId());
-		request.addParameter("psw", MD5.getMD5(eewebApplication.getUserDO().getPsw().getBytes()));
-		if(showAreaId > 0) {
-			request.addParameter("areaId", showAreaId);
-		}
-		page++;
-		eewebApplication.asyInvoke(new ThreadAid(new LoadItems(), request));
+//		RemoteManager remoteManager = RemoteManager.getFullFeatureRemoteManager();
+//		Request request = remoteManager.createQueryRequest(Config.getConfig().getProperty(Config.Names.ITEM_LIST_URL));
+//		request.addParameter("page", page);
+//		request.addParameter("userId", eewebApplication.getUserDO().getId());
+//		request.addParameter("psw", MD5.getMD5(eewebApplication.getUserDO().getPsw().getBytes()));
+//		if(showAreaId > 0) {
+//			request.addParameter("areaId", showAreaId);
+//		}
+//		page++;
+//		eewebApplication.asyInvoke(new ThreadAid(new LoadItems(), request));
 		setUpdateTime(null);
+		
+
+		RemoteManager remoteManager = RemoteManager.getRawRemoteManager();
+		remoteManager.setResponseParser(new StringResponseParser());
+		Request request = remoteManager.createPostRequest(Config.Values.URL);
+		final Map<String, Object> map = CollectionUtil.newHashMap();
+		map.put("user", eewebApplication.getUserDO().getUsername());
+		request.setBody(JsonUtil.mapToJson(map));
+		request.addHeader("type", "getAllDevice");
+
+		eewebApplication.asyInvoke(new ThreadAid(new LoadItems(), request, remoteManager));
 	}
 	
 	private void setUpdateTime(Date date) {
@@ -164,6 +188,11 @@ public class InTimeActivity extends BaseActivity {
 		setViewContent();
 		setViewVisiableBySynchronization(largeLoadFramelayout);
 		request();
+	}
+	
+	public void handleAdd(View v) {
+		Intent intent = new Intent(InTimeActivity.this, DeviceReadAddActivity.class);
+		startActivityForResult(intent, ACTIVITY_RESULT_CODE);
 	}
 
 	public void handleChangeArea(View v) {
@@ -189,6 +218,15 @@ public class InTimeActivity extends BaseActivity {
 				int arg2,// The position of the view in the adapter
 				long arg3// The row id of the item that was clicked
 		) {
+			Object obj = arg0.getItemAtPosition(arg2);
+			if(!(obj instanceof DeviceBean)) {
+				return;
+			}
+			DeviceBean bean = (DeviceBean) obj;
+			Intent intent = new Intent(InTimeActivity.this, DeviceDetailActivity.class);
+			intent.putExtra("deviceBean", bean);
+			startActivityForResult(intent, ACTIVITY_RESULT_CODE);
+			
 //			EquipmentDO equipmentDO = (EquipmentDO) arg0.getItemAtPosition(arg2);
 //			alert("click Equipment, name is " + equipmentDO.getName());
 			
@@ -200,9 +238,26 @@ public class InTimeActivity extends BaseActivity {
 
 	}
 	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == ACTIVITY_DEL_RESULT_CODE) {
+			handleReflush(null);
+			return;
+		}
+
+		if(data != null) {
+			boolean refush = data.getExtras().getBoolean("needRefulsh");
+			if (refush) {
+				handleReflush(null);
+				return;
+			}
+		}
+	}
+	
 	private class EquipmentAdapter extends AbstractBaseAdapter {
 
-		public EquipmentAdapter(List<EquipmentDO> catList) {
+		public EquipmentAdapter(List<DeviceBean> catList) {
 			super(catList);
 		}
 
@@ -214,38 +269,63 @@ public class InTimeActivity extends BaseActivity {
 			} else {
 				holder = (ViewHolder) convertView;
 			}
-
-			EquipmentDO equipmentDO = (EquipmentDO) getItem(position);
-			if (equipmentDO != null) {
-				holder.nameTv.setText(equipmentDO.getName());
-				// 温度设置
-				if(equipmentDO.getTemperature() == 0) {
+			
+			DeviceBean deviceBean = (DeviceBean) getItem(position);
+			if (deviceBean != null) {
+				holder.nameTv.setText(deviceBean.getDevName());
+				if (deviceBean.getDataBean() != null) {
+					if (!StringUtil.isBlank(deviceBean.getDataBean().getTemp())) {
+						holder.tempTv.setText(deviceBean.getDataBean().getTemp());
+					} else {
+						holder.tempTv.setText("-- ");
+					}
+					if (!StringUtil.isBlank(deviceBean.getDataBean().getHumi())) {
+						holder.humiTv.setText(deviceBean.getDataBean().getHumi());
+					} else {
+						holder.humiTv.setText("-- ");
+					}
+				} else {
 					holder.tempTv.setText("-- ");
-				} else {
-					holder.tempTv.setText(NumberFormatUtil.formatByInt(equipmentDO.getTemperature(), 2));
-				}
-				
-				// 湿度设置
-				if(equipmentDO.getHumidity() == 0) {
 					holder.humiTv.setText("-- ");
-				} else {
-					holder.humiTv.setText(NumberFormatUtil.formatByInt(equipmentDO.getHumidity(), 2));
-				}
-				
-				// 光照设置
-				if (equipmentDO.getShine() == 0) {
-					holder.shineTv.setText("-- ");
-				} else {
-					holder.shineTv.setText(String.valueOf(equipmentDO.getShine()));
 				}
 
-				// co2设置
-				if (equipmentDO.getCo2() == 0) {
-					holder.co2Tv.setText("-- ");
-				} else {
-					holder.co2Tv.setText(String.valueOf(equipmentDO.getCo2()));
-				}
-			} 
+				holder.timeTv.setText(deviceBean.getDataBean().getTime());
+//				holder.shineTv.setText("-- ");
+//				holder.co2Tv.setText("-- ");
+			}
+			
+
+//			EquipmentDO equipmentDO = (EquipmentDO) getItem(position);
+//			if (equipmentDO != null) {
+//				holder.nameTv.setText(equipmentDO.getName());
+//				// 温度设置
+//				if(equipmentDO.getTemperature() == 0) {
+//					holder.tempTv.setText("-- ");
+//				} else {
+//					holder.tempTv.setText(NumberFormatUtil.formatByInt(equipmentDO.getTemperature(), 2));
+//				}
+//				
+//				// 湿度设置
+//				if(equipmentDO.getHumidity() == 0) {
+//					holder.humiTv.setText("-- ");
+//				} else {
+//					holder.humiTv.setText(NumberFormatUtil.formatByInt(equipmentDO.getHumidity(), 2));
+//				}
+//				
+//				// 光照设置
+//				if (equipmentDO.getShine() == 0) {
+//					holder.shineTv.setText("-- ");
+//				} else {
+//					holder.shineTv.setText(String.valueOf(equipmentDO.getShine()));
+//				}
+//
+//				// co2设置
+//				if (equipmentDO.getCo2() == 0) {
+//					holder.co2Tv.setText("-- ");
+//				} else {
+//					holder.co2Tv.setText(String.valueOf(equipmentDO.getCo2()));
+//				}
+//			} 
 			
 			
 //			if (catDO != null) {
@@ -274,8 +354,9 @@ public class InTimeActivity extends BaseActivity {
 		public TextView nameTv;
 		public TextView tempTv;
 		public TextView humiTv;
-		public TextView shineTv;
-		public TextView co2Tv;
+		public TextView timeTv;
+//		public TextView shineTv;
+//		public TextView co2Tv;
 
 		public ViewHolder(Context context) {
 			super(context);
@@ -284,8 +365,9 @@ public class InTimeActivity extends BaseActivity {
 			nameTv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_name_tv);
 			tempTv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_temp_tv);
 			humiTv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_humi_tv);
-			shineTv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_shine_tv);
-			co2Tv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_co2_tv);
+			timeTv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_time_tv);
+//			shineTv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_shine_tv);
+//			co2Tv = (TextView) itemWrap.findViewById(R.id.intime_grid_view_item_co2_tv);
 		}
 	}
 	
@@ -316,60 +398,152 @@ public class InTimeActivity extends BaseActivity {
 
 		@Override
 		public synchronized void  onPostExecute(Response response) {
-			setViewGone(largeLoadFramelayout);
-			
-			if (response == null) {
-				return;
-			}
-			if (response.isSuccess()) {
-				final List<EquipmentDO> currentItemList = JSONHelper.json2ItemList((JSONObject) response.getModel());  //JSONHelper.json2ItemList((JSONObject) response.getModel());
-				int currentSize = currentItemList.size();
-				if (currentSize == 0) {
-//					isLastPage = true;
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							toastLong("没有更多的数据");
-						}
-					});
-//					setViewGone(loadMoreBtn, loadMoreProgressBar);
+			try {
+				if (response == null) {
 					return;
-				} else {
-//					setViewVisible(listView, loadMoreBtn);
-//					setViewGone(loadMoreProgressBar);
 				}
 				
-				if(page == 2) {
-					equiList.clear();
+				JSONArray array = JsonUtil.getJsonArray(response.getModel());
+				if (array == null) {
+					setViewGone(largeLoadFramelayout);
+					toastLong("暂无设备数据");
+					return;
 				}
-				equiList.addAll(currentItemList);
+				
+				List<DeviceBean> beanList = CollectionUtil.newArrayList();
+				JSONObject jsonObject = null;
+				DeviceBean bean = null;
+				for (int i = 0, size = array.length(); i < size; i++) {
+					jsonObject = array.getJSONObject(i);
+					bean = JsonUtil.jsonToBean(jsonObject.toString(), DeviceBean.class);
+					beanList.add(bean);
+				}
+				
+				DeviceDataBean dataBean = null;
+				for(DeviceBean deviceBean : beanList) {
+					if(!StringUtil.isBlank(bean.getSnaddr())) {
+						dataBean = requestDeviceDataBean(deviceBean);
+						deviceBean.setDataBean(dataBean);
+					}
+				}
+				
+				Collections.sort(beanList, new DeviceSort());
+				setViewGone(largeLoadFramelayout);
+				equiList.clear();
+				equiList.addAll(beanList);
 				
 				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (intimeGridView.getAdapter() == null) {
-							intimeGridView.setAdapter(equipmentAdapter);
-						} else {
-							equipmentAdapter.notifyDataSetChanged();
-						}
+				@Override
+				public void run() {
+					if (intimeGridView.getAdapter() == null) {
+						intimeGridView.setAdapter(equipmentAdapter);
+					} else {
+						equipmentAdapter.notifyDataSetChanged();
 					}
-				});
+				}
+			});
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			
+			if (response.isSuccess()) {
+//				final List<EquipmentDO> currentItemList = JSONHelper.json2ItemList((JSONObject) response.getModel());  //JSONHelper.json2ItemList((JSONObject) response.getModel());
+//				int currentSize = currentItemList.size();
+//				if (currentSize == 0) {
+//					runOnUiThread(new Runnable() {
+//						@Override
+//						public void run() {
+//							toastLong("没有更多的数据");
+//						}
+//					});
+//					return;
+//				} else {
+//				}
+//				
+//				if(page == 2) {
+//					equiList.clear();
+//				}
+//				equiList.addAll(currentItemList);
+//				
+//				runOnUiThread(new Runnable() {
+//					@Override
+//					public void run() {
+//						if (intimeGridView.getAdapter() == null) {
+//							intimeGridView.setAdapter(equipmentAdapter);
+//						} else {
+//							equipmentAdapter.notifyDataSetChanged();
+//						}
+//					}
+//				});
 
 			} else {
-//					setViewVisible(loadMoreBtn);
-//					setViewGone(loadMoreProgressBar);
-				final String msg = response.getMessage();
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						toastLong(msg);
-						// TODO ..更多按钮隐藏
-					}
-				});
+//				final String msg = response.getMessage();
+//				runOnUiThread(new Runnable() {
+//					@Override
+//					public void run() {
+//						toastLong(msg);
+//					}
+//				});
 			}
-			
+		}
+	}
+	
+	private class DeviceSort implements Comparator<DeviceBean> {
+
+		@Override
+		public int compare(DeviceBean o1, DeviceBean o2) {
+
+			if (o1.getDataBean() == null) {
+				return 1;
+			}
+
+			if (o2.getDataBean() == null) {
+				return -1;
+			}
+
+			if (o1.getDataBean().getAbnormal().equals(o2.getDataBean().getAbnormal())) {
+				return o1.getSnaddr().compareTo(o2.getSnaddr());
+			}
+
+			if (o1.getDataBean().isSuccess()) {
+				return -1;
+			}
+
+			if (o2.getDataBean().isSuccess()) {
+				return 1;
+			}
+			return o1.getSnaddr().compareTo(o2.getSnaddr());
+		
 		}
 		
+	}
+	
+	private DeviceDataBean requestDeviceDataBean(DeviceBean bean) {
+		Map<String, String> headerMap = new HashMap<String, String>();
+		headerMap.put("TYPE", "getRTData");
+		Map<String, String> bodyMap = new HashMap<String, String>();
+		bodyMap.put("snaddr", bean.getSnaddr());
+		bodyMap.put("curve", bean.getCurve());
+		String content = Httpclient.subPostForBody(Config.Values.URL, JsonUtil.mapToJson(bodyMap), Httpclient.DEFAULT_CHARSET, headerMap);
+		
+		JSONObject json = JsonUtil.getJsonObject(content);
+		if(json == null) {
+			return null;
+		}
+		DeviceDataBean dataBean = new DeviceDataBean();
+		dataBean.setAbnormal(JsonUtil.getString(json, "abnormal", null));
+		dataBean.setTime(JsonUtil.getString(json, "time", null));
+		JSONObject humiJson = JsonUtil.getJSONObject(json, "humi");
+		dataBean.setHumi(JsonUtil.getString(humiJson, "value", null));
+		dataBean.setHumiStatus(ChangeUtil.str2int(JsonUtil.getString(humiJson, "status", null)));
+		
+		JSONObject tempJson = JsonUtil.getJSONObject(json, "temp");
+		dataBean.setTemp(JsonUtil.getString(tempJson, "value", null));
+		dataBean.setTempStatus(ChangeUtil.str2int(JsonUtil.getString(tempJson, "status", null)));
+		
+		return dataBean;
 	}
 
 	public void showArea() {

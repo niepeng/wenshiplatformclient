@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent" android:background="@color/bg_gray_light">
+	android:layout_height="fill_parent" android:background="@color/white">
 
 
 	<!-- 标题栏 -->
 	<RelativeLayout style="@style/app_title_main">
 	    
+	    <!-- 
 	     <Button
             android:id="@+id/shopping_list_edit"
             style="@style/app_title_left"
@@ -14,6 +15,7 @@
             android:paddingBottom="5dip"
             android:paddingTop="5dip"
             android:text="清空报警" />
+	     -->
 	     
 		
 		<!-- 标题 -->
@@ -30,11 +32,10 @@
 		
 	</RelativeLayout>
 	
-	<!-- 更新时间 -->
 
     <LinearLayout
         style="@style/fw"
-        android:background="@drawable/border_corner" >
+         android:background="@color/gray" >
 
         <TextView
             android:id="@+id/intime_gmtmodified_tv"
@@ -43,11 +44,12 @@
             android:layout_marginTop="3dip"
             android:paddingLeft="10dip"
             android:textColor="@color/black"
+            android:text="只能查询到最近24小时内的报警信息"
             android:textSize="16dip" />
     </LinearLayout>
     
 
-	<include layout="@layout/title_line_bottom" />
+	<!-- <include layout="@layout/title_line_bottom" /> -->
 	
 	 <include layout="@layout/loading_large" /> 
 	 
@@ -59,10 +61,10 @@
         android:layout_marginTop="0dip"
         android:layout_weight="1"
         android:cacheColorHint="@color/app_main"
-        android:divider="@drawable/list_split"
-        android:dividerHeight="0dp"
+        android:divider="@drawable/list_split2"
+        android:dividerHeight="0.2dp"
         android:fastScrollEnabled="false"
         android:footerDividersEnabled="true" />
-
+		<!-- android:divider="@drawable/list_split" -->
 	
 </LinearLayout>

@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,6 +23,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -36,6 +39,7 @@ import com.baibutao.app.waibao.yun.android.remote.BinaryItem;
 import com.baibutao.app.waibao.yun.android.remote.Parameter;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
 import com.baibutao.app.waibao.yun.android.util.IoUtil;
+import com.baibutao.app.waibao.yun.android.util.StringUtil;
 
 /**
  * @author lsb
@@ -97,6 +101,25 @@ public static final int TIMEOUT = 5000;
 		}
 		return httpPostRequest;
 	}
+
+
+	public static HttpPost createPostMethodForBody(String url, String body, Map<String, String> headerMap) {
+		HttpPost httpPostRequest = new HttpPost(url);
+		httpPostRequest.getParams().setParameter(TIMEOUT_PARAM, TIMEOUT);
+		try {
+			if (headerMap != null) {
+				for (Entry<String, String> entry : headerMap.entrySet()) {
+					httpPostRequest.addHeader(entry.getKey(), entry.getValue());
+				}
+			}
+			StringEntity stringEntity = new StringEntity(body);
+			httpPostRequest.setEntity(stringEntity);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
+		return httpPostRequest;
+	}
+	
 	
 	public static HttpGet createGetMethod(String url, List<Parameter> parameters) throws IOException {
 		URI uri = createURI(url, toHttpClientParameters(parameters));

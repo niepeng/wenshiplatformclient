@@ -19,18 +19,33 @@ public class ThreadAid implements Callable<Response> {
 
 	private Request request;
 	
+	private RemoteManager remoteManager;
+	
 	
 	public ThreadAid(ThreadListener threadListener, Request request) {
 		super();
 		this.threadListener = threadListener;
 		this.request = request;
 	}
+	
+	
+	
+	public ThreadAid(ThreadListener threadListener, Request request, RemoteManager remoteManager) {
+		super();
+		this.threadListener = threadListener;
+		this.request = request;
+		this.remoteManager = remoteManager;
+	}
+	
+	
 
 	@Override
 	public Response call() throws Exception {
 		Response response = null;
 		try {
-			RemoteManager remoteManager = RemoteManager.getFullFeatureRemoteManager();
+			if(remoteManager == null) {
+				remoteManager = RemoteManager.getFullFeatureRemoteManager();
+			}
 			response = remoteManager.execute(request);
 			return response;
 		} catch (Exception e) {
