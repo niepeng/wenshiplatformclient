@@ -9,7 +9,7 @@ public class SetupDO {
 	private int alarmtime;
 	
 	public SetupDO() {
-		this.alarmtime = 5 * 60;
+		this.alarmtime = 2 * 60;
 		this.updateIntime = 1 * 60;
 	}
 	

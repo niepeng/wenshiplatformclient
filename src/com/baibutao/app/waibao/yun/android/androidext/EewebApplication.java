@@ -10,6 +10,8 @@ import java.util.concurrent.Future;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.widget.TabHost;
 
 import com.baibutao.app.waibao.yun.android.activites.common.TabFlushEnum;
@@ -24,7 +26,6 @@ import com.baibutao.app.waibao.yun.android.localcache.FileCache;
 import com.baibutao.app.waibao.yun.android.localcache.ImageCache;
 import com.baibutao.app.waibao.yun.android.remote.RemoteManager;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
-import com.baibutao.app.waibao.yun.android.util.StringUtil;
 import com.baidu.location.LocationClient;
 
 /**
@@ -35,10 +36,6 @@ import com.baidu.location.LocationClient;
 public class EewebApplication extends Application {
 	
 	private AsynchronizedInvoke asynchronizedInvoke;
-	
-	private int versionCode;
-
-	private String versionName;
 	
 	private TabHost tabHost;
 	
@@ -111,22 +108,20 @@ public class EewebApplication extends Application {
 	}
 
 	public int getVersionCode() {
-		if (versionCode == 0) {
-			getVersionInfo();
+		return getPackageInfo().versionCode;
+	}
+	
+	private PackageInfo getPackageInfo() {
+		try {
+			PackageManager packageManager = getPackageManager();
+			return packageManager.getPackageInfo(getPackageName(), 0);
+		} catch (Exception e) {
 		}
-		return versionCode;
-	}
-
-	private void getVersionInfo() {
-		versionName = "Android_" + Config.getConfig().getVersionPerperty("hui.version.name");
-		versionCode = Integer.parseInt(Config.getConfig().getVersionPerperty("hui.version.code"));
-	}
-
+		return null;
+	} 
+	
 	public String getVersionName() {
-		if (StringUtil.isEmpty(versionName)) {
-			getVersionInfo();
-		}
-		return versionName;
+		return getPackageInfo().versionName;
 	}
 
 	public void finishAllActivities() {

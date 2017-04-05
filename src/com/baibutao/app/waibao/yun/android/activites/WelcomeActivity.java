@@ -56,7 +56,7 @@ public class WelcomeActivity extends BaseActivity {
 		};
 		
 		// 异步发送一次请求注册
-		eewebApplication.asyInvoke(new AuthorUserTask(eewebApplication));
+//		eewebApplication.asyInvoke(new AuthorUserTask(eewebApplication));
 		
 		taskGroup.addMust(loadCatDataThread);
 		taskGroup.addMust(navigationThread);

@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baibutao.app.waibao.yun.android.R;
-import com.baibutao.app.waibao.yun.android.activites.AlarmActivity;
 import com.baibutao.app.waibao.yun.android.androidext.EewebApplication;
 import com.baibutao.app.waibao.yun.android.biz.LoadImgDO;
 import com.baibutao.app.waibao.yun.android.biz.bean.AlarmBean;

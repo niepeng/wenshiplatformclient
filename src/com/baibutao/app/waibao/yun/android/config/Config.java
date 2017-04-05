@@ -19,6 +19,10 @@ public class Config {
 	public interface Values {
 		
 		String URL = "http://api.eefield.com";
+		
+		String YUN_ALARM_URL = "http://yun.eefield.com/user/jsonRecentlyAlarmList.htm";
+
+		String YUN_CHECK_VERSION_URL = "http://yun.eefield.com/user/version.htm";
 	}
 
 	public interface Names {

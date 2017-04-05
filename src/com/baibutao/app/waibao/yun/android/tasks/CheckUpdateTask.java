@@ -26,6 +26,7 @@ import com.baibutao.app.waibao.yun.android.util.JsonUtil;
  * @date 2012-5-30 ÉÏÎç10:30:10
  */
 public class CheckUpdateTask implements Runnable {
+	
 	private Handler handler;
 	
 	private String lastAndroidClientUrl;
@@ -47,15 +48,16 @@ public class CheckUpdateTask implements Runnable {
 	@Override
 	public void run() {
 		try {
-			RemoteManager remoteManager = RemoteManager.getSecurityRemoteManager();
-			String checkUpdateUrl = Config.getConfig().getProperty(Config.Names.CHECK_UPDATE_URL);
-			Request request = remoteManager.createQueryRequest(checkUpdateUrl);
-			request.addParameter("type", "0");
+			final RemoteManager remoteManager = RemoteManager.getRawRemoteManager();
+			final Request request = remoteManager.createQueryRequest(Config.Values.YUN_CHECK_VERSION_URL);
+			request.addParameter("user", cardApplication.getUserDO().getUsername());
 			Response response = remoteManager.execute(request);
+
 			if (!response.isSuccess()) {
 				Log.w("check update", "fail, because of " + response.getMessage());
 				return;
 			}
+			
 			JSONObject jsonObject = (JSONObject)response.getModel();
 			JSONObject json = jsonObject.getJSONObject("data");
 			int lastAndroidVersion = JsonUtil.getInt(json, "lastversion", 1);

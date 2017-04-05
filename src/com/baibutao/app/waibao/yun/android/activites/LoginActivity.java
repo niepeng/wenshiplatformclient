@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -22,7 +21,6 @@ import com.baibutao.app.waibao.yun.android.remote.RemoteManager;
 import com.baibutao.app.waibao.yun.android.remote.Request;
 import com.baibutao.app.waibao.yun.android.remote.Response;
 import com.baibutao.app.waibao.yun.android.remote.parser.StringResponseParser;
-import com.baibutao.app.waibao.yun.android.remotesimple.Httpclient;
 import com.baibutao.app.waibao.yun.android.util.CollectionUtil;
 import com.baibutao.app.waibao.yun.android.util.JsonUtil;
 import com.baibutao.app.waibao.yun.android.util.MD5;
@@ -52,13 +50,10 @@ public class LoginActivity extends BaseActivity {
 			pswText.setText(userDO.getPsw());
 		}
 	}
-
+	
 	public void handleLogin(View v) {
-		
 //		Intent intent = new Intent(LoginActivity.this, NavigationActivity.class);
 //		startActivity(intent);
-		
-		
 		String username = usernameText.getText().toString();
 		String psw = pswText.getText().toString();
 
@@ -97,13 +92,12 @@ public class LoginActivity extends BaseActivity {
 		request.addHeader("type", "login");
 		
 		
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				String resultValue = Httpclient.subPostForBody(Config.Values.URL, JsonUtil.mapToJson(map), null, "type", "login");
-//				Log.e("ffffffffffff", resultValue);
-//			}
-//		}).start();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				
+			}
+		}).start();
 		
 		ProgressDialog progressDialog = showProgressDialog(R.string.app_read_data);
 		progressDialog.setOnDismissListener(new Login());

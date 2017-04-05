@@ -40,6 +40,14 @@ public class DateUtil {
 		return d1 > d2;
 	}
 	
+	public static Date parseNoException(String input) {
+		try {
+			return parse(input, DATE_FMT);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
 	public static Date parse(String input, String fmt) {
 		SimpleDateFormat sdf = new SimpleDateFormat(fmt);
 		try {

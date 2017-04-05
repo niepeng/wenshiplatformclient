@@ -52,9 +52,18 @@ public class SetupActivity extends BaseActivity {
 	}
 	
 	public void handleCheckUpdate(View v) {
-		RemoteManager remoteManager = RemoteManager.getSecurityRemoteManager();
-		String checkUpdateUrl = Config.getConfig().getProperty(Config.Names.CHECK_UPDATE_URL);
-		Request request = remoteManager.createQueryRequest(checkUpdateUrl);
+		
+//		RemoteManager remoteManager = RemoteManager.getSecurityRemoteManager();
+//		String checkUpdateUrl = Config.getConfig().getProperty(Config.Names.CHECK_UPDATE_URL);
+//		Request request = remoteManager.createQueryRequest(checkUpdateUrl);
+//		ProgressDialog progressDialog = showProgressDialog(R.string.app_read_data);
+//		CheckUpdate checkUpdate = new CheckUpdate(this); 
+//		progressDialog.setOnDismissListener(checkUpdate);
+//		checkUpdate.setResponseFuture(eewebApplication.asyInvoke(new ThreadHelper(progressDialog, request)));
+		
+		final RemoteManager remoteManager = RemoteManager.getRawRemoteManager();
+		final Request request = remoteManager.createQueryRequest(Config.Values.YUN_CHECK_VERSION_URL);
+		request.addParameter("user", eewebApplication.getUserDO().getUsername());
 		ProgressDialog progressDialog = showProgressDialog(R.string.app_read_data);
 		CheckUpdate checkUpdate = new CheckUpdate(this); 
 		progressDialog.setOnDismissListener(checkUpdate);

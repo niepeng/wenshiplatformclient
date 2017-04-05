@@ -74,7 +74,10 @@ public class MessageService extends Service {
 		if(flag.get()) {
 			return result;
 		}
-		SetupDO setup = SetupInfoHolder.getDO(this);
+		
+		// 报警更新时间周期有用，默认是2分钟
+		SetupDO setup = new SetupDO();
+//		SetupDO setup = SetupInfoHolder.getDO(this);
 		// 实现业务
 		if(isNeedNotification()) {
 			flag.set(true);
@@ -92,13 +95,11 @@ public class MessageService extends Service {
 	}
 
 		/**
-		 * TODO ..用户没有登陆
 		 * 考虑某个时间段不通知用户: 00:00 ~ 8:00
 		 * @return
 		 */
 		private boolean isNeedNotification() {
 			// 获取用户
-			
 			Date date = new Date();
 			Calendar c = Calendar.getInstance();
 			c.setTime(date);
