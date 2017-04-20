@@ -1,3 +1,3 @@
 # wenshiplatformclient
 
-已于2017年4月废弃
+已于2017年4月2日 废弃
